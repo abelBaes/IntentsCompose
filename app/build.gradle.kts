@@ -6,7 +6,7 @@ plugins {
 android {
     namespace = "br.edu.ifsp.scl.prdm.sc3039307.intentscompose"
     compileSdk {
-        version = release(36) {
+        version = release(37) {
             minorApiLevel = 1
         }
     }
