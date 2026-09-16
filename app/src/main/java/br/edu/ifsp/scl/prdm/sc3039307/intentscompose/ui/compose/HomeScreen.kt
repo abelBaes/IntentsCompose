@@ -38,7 +38,7 @@ fun HomeScreen(currentText: String, modifier: Modifier, nextScreenClick: (String
             fontSize = 20.sp
         )
         Text(
-            text = "",
+            text = "$currentText",
             Modifier.padding(15.dp),
             fontSize = 20.sp
         )
