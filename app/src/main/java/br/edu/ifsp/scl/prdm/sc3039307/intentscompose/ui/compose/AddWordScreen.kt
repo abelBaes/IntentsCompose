@@ -38,7 +38,7 @@ fun AddWordScreen(actualText: String, modifier: Modifier, concatenateText: (Stri
             fontSize = 25.sp
         )
         Text(
-            text = "$actualText",
+            text = actualText,
             Modifier.padding(10.dp),
             fontSize = 20.sp,
             fontWeight = FontWeight.Bold
@@ -52,7 +52,7 @@ fun AddWordScreen(actualText: String, modifier: Modifier, concatenateText: (Stri
                 .padding(20.dp)
         )
         Button(
-            onClick = {}
+            onClick = {concatenateText(textToConcatenate)}
         ) {
             Text(
                 text = "Concatenar",
