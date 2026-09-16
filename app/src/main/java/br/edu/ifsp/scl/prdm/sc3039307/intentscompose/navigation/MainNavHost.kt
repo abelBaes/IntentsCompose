@@ -15,34 +15,41 @@ import androidx.navigation.navArgument
 import br.edu.ifsp.scl.prdm.sc3039307.intentscompose.ui.compose.AddWordScreen
 import br.edu.ifsp.scl.prdm.sc3039307.intentscompose.ui.compose.HomeScreen
 
-private const val CURRENT_TEXT_KEY = "current_text"
 private const val NEW_TEXT_KEY = "new_text"
 
 @Composable
-fun MainNavHost(navHostController: NavHostController, modifier: Modifier) {
+fun MainNavHost(navHostController: NavHostController, modifier: Modifier = Modifier) {
+    var currentText by remember { mutableStateOf("") }
 
     NavHost(
         navController = navHostController,
-        startDestination = Screen.HomeScreen.route
+        startDestination = Screen.HomeScreen.route,
+        modifier = modifier
     ) {
         composable(
             route = Screen.HomeScreen.route
         ) { backStackEntry ->
-            val currentSavedText = backStackEntry.savedStateHandle.get<String>(CURRENT_TEXT_KEY) ?: ""
-            val newText = backStackEntry.savedStateHandle.get<String>(NEW_TEXT_KEY) ?: ""
+            val newWord = backStackEntry.savedStateHandle.get<String>(NEW_TEXT_KEY)
 
-            var currentText by remember(currentSavedText) { mutableStateOf(currentSavedText) }
+            if (!newWord.isNullOrEmpty()) {
+                currentText = if (currentText.isEmpty()) {
+                    newWord
+                } else {
+                    "$currentText $newWord"
+                }
+                backStackEntry.savedStateHandle.remove<String>(NEW_TEXT_KEY)
+            }
 
             HomeScreen(
                 currentText = currentText,
-                modifier = modifier,
+                modifier = Modifier,
                 nextScreenClick = { textToPass ->
+                    val encodedText = Uri.encode(textToPass.ifEmpty { " " })
                     navHostController.navigate(
-                        route = "${Screen.AddWordScreen.route}/${Uri.encode(textToPass)}"
+                        route = "${Screen.AddWordScreen.route}/$encodedText"
                     )
                 },
                 resetWorldClick = {
-                    backStackEntry.savedStateHandle.set(CURRENT_TEXT_KEY, "")
                     currentText = ""
                 }
             )
@@ -50,18 +57,20 @@ fun MainNavHost(navHostController: NavHostController, modifier: Modifier) {
         composable(
             route = "${Screen.AddWordScreen.route}/{textReceived}",
             arguments = listOf(
-                navArgument("textReceived"){
+                navArgument("textReceived") {
                     type = NavType.StringType
                 }
             )
-        ) {
-            backStackEntry ->
+        ) { backStackEntry ->
+            val textReceived = backStackEntry.arguments?.getString("textReceived")?.trim() ?: ""
+
             AddWordScreen(
-                actualText = backStackEntry.arguments?.getString("textReceived") ?: "",
-                modifier = modifier,
-                concatenateText = {
-                    typedText ->
-                    navHostController.previousBackStackEntry?.savedStateHandle?.set(NEW_TEXT_KEY, typedText)
+                actualText = textReceived,
+                modifier = Modifier,
+                concatenateText = { typedText ->
+                    navHostController.previousBackStackEntry
+                        ?.savedStateHandle
+                        ?.set(NEW_TEXT_KEY, typedText)
                     navHostController.popBackStack()
                 }
             )
